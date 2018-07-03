@@ -8,6 +8,8 @@
   <packaging>pom</packaging>
   <name>example-root</name>
   
+  
+  
   <modules>
     <module>module1</module>
     <module>module2</module>
