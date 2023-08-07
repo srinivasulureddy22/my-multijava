@@ -3,10 +3,13 @@
 Bottom line is we dont want to use maven release plugin it is heavy and timee consuming and not intenced to use wtih ci friendly <revision>
 
 ## references:
-https://stackoverflow.com/questions/59641739/maven-release-plugin-together-with-cifriendly-versions
-https://medium.com/outbrain-engineering/faster-release-with-maven-ci-friendly-versions-and-a-customised-flatten-plugin-fe53f0fcc0df
-https://stackoverflow.com/questions/8988405/automatically-incrementing-a-build-number-in-a-java-project
-https://maven.apache.org/maven-ci-friendly.html
+1. https://stackoverflow.com/questions/59641739/maven-release-plugin-together-with-cifriendly-versions
+
+2. https://medium.com/outbrain-engineering/faster-release-with-maven-ci-friendly-versions-and-a-customised-flatten-plugin-fe53f0fcc0df
+
+3. https://stackoverflow.com/questions/8988405/automatically-incrementing-a-build-number-in-a-java-project
+
+4. https://maven.apache.org/maven-ci-friendly.html
 
 # Below are 5 tests output
 	 Test 1: show re-runnign a release due to tag existing (this protect releases)
