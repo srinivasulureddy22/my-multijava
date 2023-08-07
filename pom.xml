@@ -12,12 +12,29 @@
 	<revision>1.0.0-local-SNAPSHOT</revision>
   </properties>
 
-  <modules>
-    <module>module1</module>
-    <module>module2</module>
-  </modules>
+<profiles>
+  <profile>
+     <id>default</id>
+     <activation>
+        <activeByDefault>true</activeByDefault>
+        <property>
+           <name>default</name>
+           <value>!disabled</value>
+        </property>
+     </activation>
+     <modules>
+	    <module>module1</module>
+	    <module>module2</module>
+     </modules>
+  </profile>
+  <profile>
+     <id>testRelease</id>
+     <modules>
+        <module>testRelease</module>
+     </modules>
+  </profile>
+</profiles>
 
-  
   <build>
     <plugins>
 

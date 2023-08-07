@@ -63,12 +63,16 @@ case "$TEST_OPTION" in
 			echo "INFO: Skipping step 2 - checking SNAPSHOT_DEPENDENCIES"
 		fi
 
+		set -e
 		echo "Step 3 build branch - fail if build fails for compile or tests we save pushing artifacts"
 		mvn -Drevision="$RELEASE_VERSION" clean install 
 
 		echo "Step 4 if build passes push to nexus"
-		mvn -Drevision="$RELEASE_VERSION" -DskipTests 
+		mvn -Drevision="$RELEASE_VERSION" -DskipTests validate
 		#mvn -Drevision=$RELEASE_VERSION -DskipTests deploy
+
+		echo "Step 4a Validate maven artifacts"
+		mvn -Drevision="$RELEASE_VERSION" -DskipTests -P testRelease install
 
 		echo "Step 5 - Tag the release and push to repo, tag: $RELEASE_VERSION"
 		git tag $RELEASE_VERSION

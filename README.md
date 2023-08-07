@@ -13,6 +13,7 @@ https://maven.apache.org/maven-ci-friendly.html
 	 Test 2: show we fail if there are snapshot depednencies on a release
 	 Test 3: show a proper release, not the version is 1.0.sha1
 	 Test 4: Show a brnahc relase - note the version is 1.0.sha.branch-SNAPSHOT
+	 Step 4a Validate maven artifacts
 	 Test 5: Show a local build version is 1.0.sha.local-SNAPSHOT
 
 ## Test 1: show re-runnign a release due to tag existing (this protect releases)
