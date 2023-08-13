@@ -11,14 +11,15 @@ The build should read the version from the '<revision>' tag in the parent pom an
 
 ### Protected branch
 1. Validations: Check if the release tag exists and check for snapshot dependencies; both of these will fail the build
-3. Set version to x.y.<sha1> as a projected branch is always a release
-4. Tag the protected branch with the release id
+2. Set version to x.y.<sha1> as a projected branch is always a release
+3. Run clean install package # Note: deploy run as a separate step so we don't push artifacts or create tags if build/tests fail.
+4. Run deploy
+5. Tag the protected branch with the release id
 
 ## Benefits
-1. Faster
-2. Faster
-3. Every merge commit creates a release and tag
-4. There are no commits to the projected branch by CI, so we don't create additional builds in the pipeline.
+1. Your builds are measurably faster than using the release plugin
+2. Every merge commit creates a release and tag
+3. There are no commits to the projected branch by CI, so we don't create additional builds in the pipeline.
 
 ## references:
 1. https://stackoverflow.com/questions/59641739/maven-release-plugin-together-with-cifriendly-versions
