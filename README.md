@@ -1,6 +1,6 @@
 
 # ci friendly process
-Bottom line is we dont want to use maven release plugin it is heavy and timee consuming and not intenced to use wtih ci friendly <revision>
+The bottom line is we do not want to use Maven release plugin. It is heavy and time consuming and not intended to use with ci friendly <revision>
 
 ## references:
 1. https://stackoverflow.com/questions/59641739/maven-release-plugin-together-with-cifriendly-versions
@@ -9,15 +9,15 @@ Bottom line is we dont want to use maven release plugin it is heavy and timee co
 4. https://maven.apache.org/maven-ci-friendly.html
 5. Project forked from jitpack/maven-modular
 
-# Below are 5 tests output
-	 Test 1: show re-runnign a release due to tag existing (this protect releases)
-	 Test 2: show we fail if there are snapshot depednencies on a release
-	 Test 3: show a proper release, not the version is 1.0.sha1
-	 Test 4: Show a brnahc relase - note the version is 1.0.sha.branch-SNAPSHOT
+# Below are five tests output
+	 Test 1: show re-running a release due to the tag existing (this protects releases)
+	 Test 2: show we fail if there are snapshot dependencies on a release
+	 Test 3: show a proper release, not version is 1.0.sha1
+	 Test 4: Show a branch release - note the version is 1.0.sha.branch-SNAPSHOT
 	 Step 4a Validate maven artifacts
 	 Test 5: Show a local build version is 1.0.sha.local-SNAPSHOT
 
-## Test 1: show re-runnign a release due to tag existing (this protect releases)
+## Test 1: show re-running a release due to the tag existing (this protects releases)
 ```
 (base) ➜  maven-modular git:(master) ✗ sh  ./release.sh RELEASE_CHECK
 MVN_VERSION=1.0.0-local-SNAPSHOT
@@ -26,7 +26,7 @@ HEAD_SHA=11a078e
 RELEASE_VERSION=1.0.11a078e
 BRANCH_VERSION=1.0.11a078e.master-SNAPSHOT
 TEST_OPTION=RELEASE_CHECK
-Step 1 Check if releaes exit if it does fail
+Step 1 Check if release exit if it does fail
 ERROR: Tag 1.0.11a078e exists, to rebuild version delete tag the re-run
 ```
 
@@ -36,7 +36,7 @@ ERROR: Tag 1.0.11a078e exists, to rebuild version delete tag the re-run
 Deleted tag '1.0.11a078e' (was 11a078e)
 ```
 
-## Test 2: show we fail if there are snapshot depednencies on a release
+## Test 2: show we fail if there are snapshot dependencies on a release
 
 ```
 (base) ➜  maven-modular git:(master) ✗ sh  ./release.sh RELEASE_CHECK
@@ -46,8 +46,8 @@ HEAD_SHA=11a078e
 RELEASE_VERSION=1.0.11a078e
 BRANCH_VERSION=1.0.11a078e.master-SNAPSHOT
 TEST_OPTION=RELEASE_CHECK
-Step 1 Check if releaes exit if it does fail
-Step 2 check if we have any snapshots, fail build if we do
+Step 1 Check if release exit if it does fail
+Step 2 check if we have any snapshots, fail to build if we do
 ERROR: cannot release with SNAPSHOT dependencies
 ------------------------------------------------
 ./module1/pom.xml: <version>5.11.0-SNAPSHOT</version>
@@ -55,7 +55,7 @@ ERROR: cannot release with SNAPSHOT dependencies
 Updated 1 path from the index
 ```
 
-## Test 3: show a proper release, not the version is 1.0.sha1
+## Test 3: show a proper release, note version is 1.0.sha1
 
 ```
 (base) ➜  maven-modular git:(master) ✗ sh  ./release.sh RELEASE_NO_CHECK
@@ -65,9 +65,9 @@ HEAD_SHA=11a078e
 RELEASE_VERSION=1.0.11a078e
 BRANCH_VERSION=1.0.11a078e.master-SNAPSHOT
 TEST_OPTION=RELEASE_NO_CHECK
-Step 1 Check if releaes exit if it does fail
+Step 1 Check if releases exit if it does fail
 INFO: Skipping step 2 - checking SNAPSHOT_DEPENDENCIES
-Step 3 build branch - fail if build fails for compile or tests we save pushing artifacts
+Step 3 build branch - fail if the build fails for compile or tests, we save pushing artifacts
 [INFO] Scanning for projects...
 [INFO] ------------------------------------------------------------------------
 [INFO] Reactor Build Order:
