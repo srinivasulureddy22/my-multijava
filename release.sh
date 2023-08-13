@@ -40,10 +40,11 @@ case "$TEST_OPTION" in
 
 		if [ "$TEST_OPTION" = "RELEASE_CHECK" ]
 		then
-			#for demo purposes
+			#for demo purposes to make the build fail
 			cp module1/pom.xml module1/pom.xml.bak
 			sed 's/3.8.1/5.11.0-SNAPSHOT/g' module1/pom.xml.bak >module1/pom.xml
-
+			#####  test code end
+   
 			echo "Step 2 check if we have any snapshots, fail build if we do."
 			SNAPSHOT_DEPENDENCIES=`find . -name pom.xml -exec egrep -H SNAPSHOT {} \;|egrep -v '<revision>.*\..*\..*-SNAPSHOT</revision>'`
 			#echo "SNAPSHOT_DEPENDENCIES=$SNAPSHOT_DEPENDENCIES"
