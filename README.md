@@ -1,6 +1,24 @@
 
 # ci friendly process
-The bottom line is we do not want to use Maven release plugin. It is heavy and time consuming and not intended to use with ci friendly <revision>
+The bottom line is we do not want to use the Maven release plugin. It is heavy, time-consuming, and not intended to use with ci-friendly '<revision>' property.
+
+## General Approach
+The build should read the version from the '<revision>' tag in the parent pom and then build the repo passing -Drevision=xxx to build the appropriate versions.  We will use the x.y from this property but ignore the .z-<modifiers> and construct the version as follows:
+
+### Feature branches
+1. Set version to x.y.<sha>.<branch_name>-SNAPSHOT
+2. Do not tag anything
+
+### Protected branch
+1. Validations: Check if the release tag exists and check for snapshot dependencies; both of these will fail the build
+3. Set version to x.y.<sha1> as a projected branch is always a release
+4. Tag the protected branch with the release id
+
+## Benefits
+1. Faster
+2. Faster
+3. Every merge commit creates a release and tag
+4. There are no commits to the projected branch by CI, so we don't create additional builds in the pipeline.
 
 ## references:
 1. https://stackoverflow.com/questions/59641739/maven-release-plugin-together-with-cifriendly-versions
@@ -9,7 +27,7 @@ The bottom line is we do not want to use Maven release plugin. It is heavy and t
 4. https://maven.apache.org/maven-ci-friendly.html
 5. Project forked from jitpack/maven-modular
 
-# Below are five tests output
+## Below are five tests output
 	 Test 1: show re-running a release due to the tag existing (this protects releases)
 	 Test 2: show we fail if there are snapshot dependencies on a release
 	 Test 3: show a proper release, not version is 1.0.sha1
