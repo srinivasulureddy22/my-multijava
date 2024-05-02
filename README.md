@@ -19,7 +19,7 @@ The build should read the version from the '<revision>' tag in the parent pom an
 ## Benefits
 1. Your builds are measurably faster than using the release plugin
 2. Every merge commit creates a release and tag
-3. There are no commits to the projected branch by CI, so we don't create additional builds in the pipeline.
+3. There are no commits to the protected branch by CI, so we don't create additional builds in the pipeline.
 
 ## references:
 1. https://stackoverflow.com/questions/59641739/maven-release-plugin-together-with-cifriendly-versions
