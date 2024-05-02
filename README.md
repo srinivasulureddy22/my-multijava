@@ -234,7 +234,7 @@ Step 5 - Tag the release and push to repo, tag: 1.0.11a078e
 Username for 'https://github.com': ^C
 ```
 
-## Test 4: Show a brnahc relase - note the version is 1.0.sha.branch-SNAPSHOT
+## Test 4: Show a branch release - note the version is 1.0.sha.branch-SNAPSHOT
 
 ```
 (base) ➜  maven-modular git:(master) ✗ sh  ./release.sh BRANCH
