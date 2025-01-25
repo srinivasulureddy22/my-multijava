@@ -121,8 +121,7 @@ jobs:
           git fetch origin ${{ steps.get_branch.outputs.branch_name }}
           git checkout master
           git checkout ${{ steps.get_branch.outputs.branch_name }}
-          full_output=$(git diff master..${{ steps.get_branch.outputs.branch_name }} | \
-          diff-test-coverage --diff-filter *.java *.kt *.scala -c **/target/site/jacoco/jacoco.xml -t jacoco --)
+          full_output=$(git diff master..${{ steps.get_branch.outputs.branch_name }} | diff-test-coverage --diff-filter *.java *.kt *.scala -c **/target/site/jacoco/jacoco.xml -t jacoco --)
           echo "COVERAGE=$?" >> $GITHUB_ENV
           echo "COVERAGE_OUTPUT=$full_output" >> $GITHUB_ENV
           echo "Coverage output"
