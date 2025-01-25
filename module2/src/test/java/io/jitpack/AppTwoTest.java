@@ -8,6 +8,7 @@ public class AppTwoTest {
 
     @Test
     public void testApp() {
+        AppTwo.main(new String[] {});
         assertTrue(true);
     }
 }
