@@ -4,7 +4,7 @@ package io.jitpack;
  * Hello world!
  *
  */
-public class App 
+public class AppOne
 {
     public static final String GREETING = "Hello World!";
     
