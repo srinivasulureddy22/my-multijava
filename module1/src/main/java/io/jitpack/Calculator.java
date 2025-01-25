@@ -13,4 +13,8 @@ public class Calculator {
     public int add() {
         return a + b;
     }
+
+    public int subtract() {
+        return a - b;
+    }
 }
