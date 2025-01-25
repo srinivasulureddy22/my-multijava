@@ -128,7 +128,7 @@ jobs:
             echo "COVERAGE=0" >> $GITHUB_ENV
           fi
 
-          echo '```\n' > temp_file.txt && cat diff-coverage-result.txt >> temp_file.txt && echo '\n```' >> temp_file.txt && mv temp_file.txt diff-coverage-result.txt
+          echo -e '```\n' > temp_file.txt && cat diff-coverage-result.txt >> temp_file.txt && echo -e '\n```' >> temp_file.txt && mv temp_file.txt diff-coverage-result.txt
           echo "Coverage output"
           cat diff-coverage-result.txt
 
