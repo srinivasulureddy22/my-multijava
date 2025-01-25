@@ -130,6 +130,9 @@ jobs:
             echo "COVERAGE=0" >> $GITHUB_ENV
           fi
 
+          echo '```' > temp_file.txt && cat diff-coverage-result.txt >> temp_file.txt && echo '```' >> temp_file.txt && mv temp_file.txt diff-coverage-result.txt
+
+
       - name: Get PR Number
         if: always()
         run: |
