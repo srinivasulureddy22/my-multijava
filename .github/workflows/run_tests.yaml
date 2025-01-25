@@ -127,7 +127,7 @@ jobs:
           else
             echo "COVERAGE=0" >> $GITHUB_ENV
           fi
-          echo "COVERAGE_OUTPUT=$full_output" >> $GITHUB_ENV
+          echo "COVERAGE_OUTPUT='$full_output'" >> $GITHUB_ENV
           echo "Coverage output"
           echo $full_output
 
