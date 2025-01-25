@@ -125,6 +125,8 @@ jobs:
           diff-test-coverage --diff-filter *.java *.kt *.scala -c **/target/site/jacoco/jacoco.xml -t jacoco --)
           echo "COVERAGE=$?" >> $GITHUB_ENV
           echo "COVERAGE_OUTPUT=$full_output" >> $GITHUB_ENV
+          echo "Coverage output"
+          echo $full_output
 
       - name: Get PR Number
         if: always()
