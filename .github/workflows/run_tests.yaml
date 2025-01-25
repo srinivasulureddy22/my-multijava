@@ -121,15 +121,14 @@ jobs:
           git fetch origin ${{ steps.get_branch.outputs.branch_name }}
           git checkout master
           git checkout ${{ steps.get_branch.outputs.branch_name }}
-          full_output=$(git diff master..${{ steps.get_branch.outputs.branch_name }} | diff-test-coverage --diff-filter '*.java' '*.kt' '*.scala' '*.py' -c **/target/site/jacoco/jacoco.xml -t jacoco -- || true)
-          if echo "full_output" | grep -q 'ERROR:'; then
+          git diff master..${{ steps.get_branch.outputs.branch_name }} | diff-test-coverage --diff-filter '*.java' '*.kt' '*.scala' '*.py' -c **/target/site/jacoco/jacoco.xml -t jacoco -- > diff-coverage-result.txt || true
+          echo "Coverage output"
+          cat diff-coverage-result.txt
+          if grep -q 'ERROR:' diff-coverage-result.txt; then
             echo "COVERAGE=1" >> $GITHUB_ENV
           else
             echo "COVERAGE=0" >> $GITHUB_ENV
           fi
-          echo "COVERAGE_OUTPUT='$full_output'" >> $GITHUB_ENV
-          echo "Coverage output"
-          echo $full_output
 
       - name: Get PR Number
         if: always()
@@ -143,8 +142,9 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const coverage_output = process.env.COVERAGE_OUTPUT
-            const commentBody = `### Code Coverage Report\n\n- ${coverage_output}%\n\n*This comment was generated automatically by GitHub Actions.*`;
+            const fs = require('fs');
+            const commentContent = fs.readFileSync('diff-coverage-result.txt', 'utf8');
+            const commentBody = `### Code Coverage Report\n\n- ${commentContent}%\n\n*This comment was generated automatically by GitHub Actions.*`;
 
             // Posting the comment to the PR
             const prNumber = process.env.PR
