@@ -6,7 +6,9 @@ on:
       - created
 env:
   GH_TOKEN: ${{ github.token }}
-  ACTIONS_STEP_DEBUG: true
+  LINE_COVERAGE: 80
+  BRANCH_COVERAGE: 80
+  FUNCTION_COVERAGE: 80
 
 jobs:
   test-and-coverage:
@@ -121,7 +123,12 @@ jobs:
           git fetch origin ${{ steps.get_branch.outputs.branch_name }}
           git checkout master
           git checkout ${{ steps.get_branch.outputs.branch_name }}
-          git diff master..${{ steps.get_branch.outputs.branch_name }} | diff-test-coverage --diff-filter '*.java' '*.kt' '*.scala' '*.py' -c **/target/site/jacoco/jacoco.xml -t jacoco -- > diff-coverage-result.txt || true
+          git diff master..${{ steps.get_branch.outputs.branch_name }} | diff-test-coverage \
+          --line-coverage ${{ env.LINE_COVERAGE }} \
+          --branch-coverage ${{ env.BRANCH_COVERAGE }} \
+          --function-coverage ${{ env.FUNCTION_COVERAGE }} \
+          --diff-filter '*.java' '*.kt' '*.scala' '*.py' \
+          -c **/target/site/jacoco/jacoco.xml -t jacoco -- > diff-coverage-result.txt || true
           if grep -q 'ERROR:' diff-coverage-result.txt; then
             echo "COVERAGE=1" >> $GITHUB_ENV
           else
