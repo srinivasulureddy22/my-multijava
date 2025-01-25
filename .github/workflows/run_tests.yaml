@@ -147,7 +147,7 @@ jobs:
           script: |
             const fs = require('fs');
             const commentContent = fs.readFileSync('diff-coverage-result.txt', 'utf8');
-            const commentBody = `### Code Coverage Report\n\n- ${commentContent}%\n\n*This comment was generated automatically by GitHub Actions.*`;
+            const commentBody = `### Code Coverage Report\n\n ${commentContent}\n\n*This comment was generated automatically by GitHub Actions.*`;
 
             // Posting the comment to the PR
             const prNumber = process.env.PR
