@@ -1,0 +1,197 @@
+name: Test and Coverage Check
+
+on:
+  issue_comment:
+    types:
+      - created
+env:
+  GH_TOKEN: ${{ github.token }}
+  ACTIONS_STEP_DEBUG: true
+
+jobs:
+  test-and-coverage:
+    runs-on: ubuntu-latest
+    if: >
+      github.event.comment.body == '/run-ci' &&  github.event.issue.pull_request != null
+    permissions:
+      contents: write
+      pull-requests: write
+      repository-projects: write
+      id-token: write
+      statuses: write
+
+    steps:
+      # Step 1: Check out the code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Step 1.1: Get PR information using GitHub CLI
+      - name: Get PR details
+        id: get-pr
+        run: |
+          pr_number=${{ github.event.issue.number }}
+          gh api repos/${{ github.repository }}/pulls/$pr_number > pr.json
+          cat pr.json
+
+      # Step 1.2: Extract and log the PR branch name
+      - name: Extract PR branch
+        id: extract-branch
+        run: |
+          branch_name=$(jq -r '.head.ref' pr.json)
+          echo "PR branch is $branch_name"
+          echo "branch_name=$branch_name" >> $GITHUB_ENV
+
+      # Step 1.3: Check out the PR branch
+      - name: Check out PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.branch_name }}
+          fetch-depth: 0
+
+
+      # Step 2: Set up Java (JDK 11)
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Restore Maven dependencies from cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        continue-on-error: true
+
+      # Step 3: Run tests with JaCoCo coverage
+      - name: Run Tests and Generate Coverage
+        run: mvn clean test jacoco:report
+
+      - name: Save Maven dependencies into cache
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+
+      # Step 4 - Setup NodeJS
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 'lts' # Use the latest LTS version of Node.js
+          cache: 'npm'        # Enable npm caching to improve build speed
+
+      # Step 5 - Install diff-test-coverage
+      - name: Install global dependencies
+        run: npm i -g @connectis/diff-test-coverage
+
+      - name: Verify installation
+        run: diff-test-coverage --version
+
+      # Step 6: Determine current branch name
+      - name: Find current branch name using GH CLIs
+        id: get_branch
+        run: |
+          # Get PR number from the event payload
+          PR_NUMBER=${{ github.event.issue.number }}
+
+          # Fetch PR details using GitHub CLI
+          FULL_JSON=$(gh pr view $PR_NUMBER --json headRefOid,headRefName)
+
+          # Extract branch name from the json
+          PR_BRANCH=$(echo $FULL_JSON | jq -r '.headRefName')
+          # Extract the PR head SHA from the json
+          PR_COMMIT_SHA=$(echo $FULL_JSON | jq -r '.headRefOid')
+
+          # Save the branch name and commit_sha as an output variable
+          echo "branch_name=$PR_BRANCH" >> $GITHUB_OUTPUT
+          echo "commit_sha=$PR_COMMIT_SHA" >> $GITHUB_OUTPUT
+
+      # Step 7: Fetch the master branch from the remote to compare with the current branch
+      - name: Fetch origin/master
+        run: git fetch origin master
+
+      # Step 8: Evaluate coverage diff
+      - name: Evaluate Coverage Diff
+        id: diff-coverage
+        shell: bash
+        run: |
+          # Generating the diff
+          git fetch origin ${{ steps.get_branch.outputs.branch_name }}
+          git checkout master
+          git checkout ${{ steps.get_branch.outputs.branch_name }}
+          full_output=$(git diff master..${{ steps.get_branch.outputs.branch_name }} | \
+          diff-test-coverage --diff-filter *.java *.kt *.scala -c **/target/site/jacoco/jacoco.xml -t jacoco --)
+          echo "COVERAGE=$?" >> $GITHUB_ENV
+          echo "COVERAGE_OUTPUT=$full_output" >> $GITHUB_ENV
+
+      - name: Get PR Number
+        if: always()
+        run: |
+          # Get PR number from the event payload
+          echo "PR=${{ github.event.issue.number }}" >> $GITHUB_ENV
+
+      # Step 10: Post Coverage Comment on PR using github-script
+      - name: Post Coverage on PR
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const coverage_output = process.env.COVERAGE_OUTPUT
+            const commentBody = `### Code Coverage Report\n\n- ${coverage_output}%\n\n*This comment was generated automatically by GitHub Actions.*`;
+
+            // Posting the comment to the PR
+            const prNumber = process.env.PR
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: commentBody
+            });
+
+      # Step 11: Upload coverage report as a downloadable artifact
+      - name: Upload Diff-Cover HTML Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: diff-cover-report
+          path: diff-cover-report.html
+
+      - name: Report build status
+        if: always()
+        run: |
+          REPO="${{ github.repository }}"
+          COMMIT_SHA="${{ steps.get_branch.outputs.commit_sha }}"
+          TOKEN="${{ secrets.GITHUB_TOKEN }}"
+
+          # Set the status based on COVERAGE value
+          COVERAGE="${{ env.COVERAGE }}"
+          STATUS_STATE="failure"
+          STATUS_DESCRIPTION="CI build failed because diff cover evaluation failed"
+          if [ "$COVERAGE" -eq 0 ]; then
+            STATUS_STATE="success"
+            STATUS_DESCRIPTION="CI build passed with ${COVERAGE}% coverage"
+          fi
+
+          STATUS_CONTEXT="test-and-coverage"
+
+          curl -X POST \
+            -H "Authorization: token ${TOKEN}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -d '{
+              "state": "'"${STATUS_STATE}"'",
+              "description": "'"${STATUS_DESCRIPTION}"'",
+              "context": "'"${STATUS_CONTEXT}"'"
+            }' \
+            "https://api.github.com/repos/${REPO}/statuses/${COMMIT_SHA}"
+
+      # Step 12: Fail build if coverage is below 90%
+      - name: Fail build if coverage is below threshold
+        # Parse env.COVERAGE as a number before comparing
+        if: ${{ env.COVERAGE != '' && fromJson(env.COVERAGE) != 0 }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.setFailed('Error: Diff coverage is below the threshold 90')
+
