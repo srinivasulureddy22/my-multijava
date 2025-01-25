@@ -81,7 +81,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 23 # Use the latest LTS version of Node.js
-          cache: 'npm'        # Enable npm caching to improve build speed
 
       # Step 5 - Install diff-test-coverage
       - name: Install global dependencies
