@@ -120,10 +120,13 @@ jobs:
         shell: bash
         run: |
           # Generating the diff
-          git fetch origin ${{ steps.get_branch.outputs.branch_name }}
-          git checkout master
-          git checkout ${{ steps.get_branch.outputs.branch_name }}
-          git diff master..${{ steps.get_branch.outputs.branch_name }} | diff-test-coverage \
+          # git fetch origin ${{ steps.get_branch.outputs.branch_name }}
+          # git checkout master
+          # git checkout ${{ steps.get_branch.outputs.branch_name }}
+          git diff origin/master...HEAD > diff.txt
+          echo "Printing the diff"
+          cat diff.txt
+          git diff origin/master...HEAD | diff-test-coverage \
           --line-coverage ${{ env.LINE_COVERAGE }} \
           --branch-coverage ${{ env.BRANCH_COVERAGE }} \
           --function-coverage ${{ env.FUNCTION_COVERAGE }} \
@@ -164,13 +167,6 @@ jobs:
               issue_number: prNumber,
               body: commentBody
             });
-
-      # Step 11: Upload coverage report as a downloadable artifact
-      - name: Upload Diff-Cover HTML Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: diff-cover-report
-          path: diff-cover-report.html
 
       - name: Report build status
         if: always()
