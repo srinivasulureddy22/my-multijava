@@ -10,12 +10,12 @@ pool:
   vmImage: ubuntu-latest
 
 parameters:
-  - name: BUILD_module1
-    displayName: Build module1
+  - name: BUILD_MODULE1
+    displayName: Build MODULE1
     type: boolean
     default: true
-  - name: BUILD_module2
-    displayName: Build module2
+  - name: BUILD_MODULE2
+    displayName: Build MODULE2
     type: boolean
     default: true  
 jobs:
@@ -75,11 +75,11 @@ jobs:
         parameters:
           moduleName: 'module1'
           modulePath: 'module1'
-          buildCondition: ${{ parameters.BUILD_module1 }}
+          buildCondition: ${{ parameters.BUILD_MODULE1 }}
             # Build and Check COMMONS
       - template: 'templates/maven-build.yml'
         parameters:
           moduleName: 'module2'
           modulePath: 'module2'
-          buildCondition: ${{ parameters.BUILD_module2 }}
+          buildCondition: ${{ parameters.BUILD_MODULE2 }}
     
