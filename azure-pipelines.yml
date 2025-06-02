@@ -4,19 +4,41 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/java
 
 trigger:
-- master
+- none
 
 pool:
   vmImage: ubuntu-latest
 
-steps:
-- task: Maven@3
-  inputs:
-    mavenPomFile: 'pom.xml'
-    mavenOptions: '-Xmx3072m'
-    javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.11'
-    jdkArchitectureOption: 'x64'
-    publishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'package'
+parameters:
+  - name: BUILD_module1
+    displayName: Build module1
+    type: boolean
+    default: true
+  - name: BUILD_module2
+    displayName: Build module2
+    type: boolean
+    default: true  
+jobs:
+  - job: BuildArtifacts
+    displayName: Build Artifacts
+    steps:
+      - checkout: self
+        submodules: true
+
+      # Restore Maven Cache BEFORE Running Maven Commands
+      - task: Cache@2
+        displayName: Restore Maven Cache
+        inputs:
+          key: maven | "$(Agent.OS)"
+          restoreKeys: |
+            maven | "$(Agent.OS)" | dependencies
+          path: $(Pipeline.Workspace)/.m2/repository    
+      # Install Java 17
+      - task: JavaToolInstaller@0
+        inputs:
+          versionSpec: '17'
+          jdkArchitectureOption: 'x64'
+          jdkSourceOption: 'PreInstalled'     
+
+
+
