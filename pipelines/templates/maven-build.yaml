@@ -1,0 +1,30 @@
+parameters:
+  - name: moduleName
+    type: string
+  - name: modulePath
+    type: string
+  - name: buildCondition
+    type: boolean
+
+steps:
+  - script: |
+      echo "Building ${{ parameters.moduleName }}"
+      mvn deploy -Dmaven.repo.local=$(Pipeline.Workspace)/.m2/repository --settings $(Agent.TempDirectory)/settings.xml -f $(System.DefaultWorkingDirectory)/${{ parameters.modulePath }}/pom.xml
+    displayName: Build ${{ parameters.moduleName }}
+    condition: and(succeeded(), eq('${{ parameters.buildCondition }}', true))
+
+  - task: CopyFiles@2
+    displayName: Copy ${{ parameters.moduleName }} artifact
+    inputs:
+      SourceFolder: $(System.DefaultWorkingDirectory)/${{ parameters.modulePath }}/target
+      Contents: ${{ parameters.moduleName }}.*
+      TargetFolder: $(Build.ArtifactStagingDirectory)/${{ parameters.moduleName }}
+    condition: and(succeeded(), eq('${{ parameters.buildCondition }}', true))
+
+  - task: PublishBuildArtifacts@1
+    displayName: Publish ${{ parameters.moduleName }} artifact
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/${{ parameters.moduleName }}
+      ArtifactName: ${{ parameters.moduleName }}
+      publishLocation: Container
+    condition: and(succeeded(), eq('${{ parameters.buildCondition }}', true))
