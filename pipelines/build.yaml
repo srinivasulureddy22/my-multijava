@@ -8,6 +8,8 @@ trigger:
 
 pool:
   vmImage: ubuntu-latest
+variables:
+  - group: myvar  
 
 parameters:
   - name: BUILD_MODULE1
@@ -24,21 +26,22 @@ jobs:
     steps:
       - checkout: self
         submodules: true
-
-      # Restore Maven Cache BEFORE Running Maven Commands
+      
       - task: Cache@2
         displayName: Restore Maven Cache
         inputs:
           key: maven | "$(Agent.OS)"
           restoreKeys: |
             maven | "$(Agent.OS)" | dependencies
-          path: $(Pipeline.Workspace)/.m2/repository    
+          path: $(Pipeline.Workspace)/.m2/repository
+  
+
       # Install Java 17
       - task: JavaToolInstaller@0
         inputs:
           versionSpec: '17'
           jdkArchitectureOption: 'x64'
-          jdkSourceOption: 'PreInstalled'     
+          jdkSourceOption: 'PreInstalled'
 
       # Download the secure settings.xml file from Azure DevOps Secure Files
       - task: DownloadSecureFile@1
@@ -49,35 +52,26 @@ jobs:
       # Configure settings.xml path (Fixing copy command issue)
       - script: |
           echo "Using Secure settings.xml"
-          IF NOT EXIST "$(Agent.TempDirectory)\settings.xml" copy /Y "$(settingsFile.secureFilePath)" "$(Agent.TempDirectory)\settings.xml"
-        displayName: Configure Maven settings.xml
-
-      # Verify if dependencies are available offline
-     # - script: |
-     #     echo "Checking if dependencies are cached..."
-     #     mvn dependency:go-offline -Dmaven.repo.local=$(Pipeline.Workspace)/.m2/repository --settings $(Agent.TempDirectory)/settings.xml
-     #   displayName: Verify Maven Cache
-
+          if [ ! -f "$(Agent.TempDirectory)/settings.xml" ]; then
+            cp "$(settingsFile.secureFilePath)" "$(Agent.TempDirectory)/settings.xml"
+          fi
+        displayName: 'Configure Maven settings.xml'
+            
       # Install Dependencies using Maven
       - script: |
           echo "Building Dependencies"
           mvn deploy -Dmaven.repo.local=$(Pipeline.Workspace)/.m2/repository --settings $(Agent.TempDirectory)/settings.xml
-        displayName: Install Dependencies 
+        displayName: Install Dependencies   
 
-      # Debug: Check dependency resolution
-      #- script: |
-      #    echo "Verifying dependency tree..."
-      #    mvn dependency:tree -Dmaven.repo.local=$(Pipeline.Workspace)/.m2/repository --settings $(Agent.TempDirectory)/settings.xml
-      #  displayName: Debug Dependency Cache
 
-      # Build and Check COMMONS
-      - template: 'templates/maven-build.yml'
+      # Build and Check MODULE1
+      - template: 'templates/maven-build.yaml'
         parameters:
           moduleName: 'module1'
           modulePath: 'module1'
           buildCondition: ${{ parameters.BUILD_MODULE1 }}
-            # Build and Check COMMONS
-      - template: 'templates/maven-build.yml'
+      # Build and Check MODULE2
+      - template: 'templates/maven-build.yaml'
         parameters:
           moduleName: 'module2'
           modulePath: 'module2'
