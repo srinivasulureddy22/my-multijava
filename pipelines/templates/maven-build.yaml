@@ -17,7 +17,7 @@ steps:
     displayName: Copy ${{ parameters.moduleName }} artifact
     inputs:
       SourceFolder: $(System.DefaultWorkingDirectory)/${{ parameters.modulePath }}/target
-      Contents: ${{ parameters.moduleName }}.*
+      Contents: ${{ parameters.moduleName }}-*
       TargetFolder: $(Build.ArtifactStagingDirectory)/${{ parameters.moduleName }}
     condition: and(succeeded(), eq('${{ parameters.buildCondition }}', true))
 
