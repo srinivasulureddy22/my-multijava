@@ -1,0 +1,35 @@
+parameters:
+  - name: moduleName
+    type: string
+  - name: modulePath
+    type: string
+  - name: checkCondition
+    type: boolean
+  - name: runOwaspCheck
+    type: boolean
+
+steps:
+  - script: |
+      echo "Running OWASP Dependency Check for module ${{ parameters.moduleName }}"
+      mvn org.owasp:dependency-check-maven:check -Dmaven.repo.local=$(Pipeline.Workspace)/.m2/repository --settings $(Agent.TempDirectory)/settings.xml -f $(System.DefaultWorkingDirectory)/${{ parameters.modulePath }}/pom.xml -Dnvd.api.key=$(NVD_API_KEY)
+    displayName: Run OWASP Dependency Check
+    condition: and(succeeded(), eq('${{ parameters.checkCondition }}', 'true'), eq('${{ parameters.runOwaspCheck }}', 'true'))
+
+  
+
+  # Copy OWASP Dependency Report
+  - task: CopyFiles@2
+    displayName: Copy ${{ parameters.moduleName }} OWASP Dependency Check Report
+    inputs:
+      SourceFolder: $(System.DefaultWorkingDirectory)/${{ parameters.modulePath }}/target
+      Contents: dependency-check-*
+      TargetFolder: $(Build.ArtifactStagingDirectory)/${{ parameters.moduleName }}
+    condition: and(succeeded(), eq('${{ parameters.checkCondition }}', 'true'), eq('${{ parameters.runOwaspCheck }}', 'true'))
+
+  # Publish OWASP Dependency Report
+  - task: PublishPipelineArtifact@1
+    displayName: Publish ${{ parameters.moduleName }} OWASP Dependency Check Report
+    inputs:
+      targetPath: $(Build.ArtifactStagingDirectory)/${{ parameters.moduleName }}/dependency-check-report.html
+      artifactName: OWASP Dependency Check ${{ parameters.moduleName }}
+    condition: and(succeeded(), eq('${{ parameters.checkCondition }}', 'true'), eq('${{ parameters.runOwaspCheck }}', 'true'))
